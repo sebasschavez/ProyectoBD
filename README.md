@@ -1,4 +1,4 @@
-﻿# ProyectoBD
+﻿# TIENDA DE ABARROTES DON MANOLO
 
 Este proyecto es un sistema de gestión y control para una tienda de abarrotes, diseñado para facilitar el manejo de los productos y mejorar la organización del negocio.
 
@@ -28,5 +28,6 @@ Ayudar al dueño o encargado de la tienda a:
  - Información clara sobre existencias y ventas
 
  - Mejor administración del negocio
+
 
 
