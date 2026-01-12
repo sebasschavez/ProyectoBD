@@ -9,23 +9,24 @@ Este proyecto es un sistema de gestión y control para una tienda de abarrotes, 
 - ⚠️ Identificar productos que necesitan reabastecimiento
 - 📊 Llevar un mejor control del inventario
 
-🎯 Objetivo
+## 🎯 Objetivo
 
 Ayudar al dueño o encargado de la tienda a:
 
-Evitar faltantes de productos
+- Evitar faltantes de productos
 
-Tener un control más claro de las ventas
+- Tener un control más claro de las ventas
 
-Organizar mejor el inventario
+- Organizar mejor el inventario
 
-Tomar decisiones más rápidas y eficientes
+- Tomar decisiones más rápidas y eficientes
 
-✅ Beneficios
+## ✅ Beneficios
 
-Control sencillo y práctico
+ - Control sencillo y práctico
 
-Información clara sobre existencias y ventas
+ - Información clara sobre existencias y ventas
 
-Mejor administración del negocio
+ - Mejor administración del negocio
+
 
