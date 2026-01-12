@@ -1,21 +1,32 @@
 <?php
 require_once 'auth.php';
-require_once 'config.php';
+require_once 'bootstrap.php';
 
-$stats_productos = $conn->query("SELECT COUNT(*) as total FROM Producto")->fetch_assoc();
-$stats_stock_bajo = $conn->query("SELECT COUNT(*) as total FROM Producto WHERE Cantidad_Stock < 10")->fetch_assoc();
-$stats_ventas_hoy = $conn->query("SELECT COUNT(*) as total, IFNULL(SUM(Total), 0) as monto FROM Venta WHERE DATE(Venta_Fecha) = CURDATE()")->fetch_assoc();
-$stats_proveedores = $conn->query("SELECT COUNT(*) as total FROM Proveedor")->fetch_assoc();
+use App\Models\Producto;
+use App\Models\Venta;
 
-$productos_bajo_stock = $conn->query("SELECT * FROM Producto WHERE Cantidad_Stock < 10 ORDER BY Cantidad_Stock ASC LIMIT 5");
+// Obtener estadísticas usando Eloquent
+$stats_productos = Producto::count();
+$stats_stock_bajo = Producto::stockBajo()->count();
 
-$ultimas_ventas = $conn->query("
-    SELECT v.*, e.Nombre, e.Apellido 
-    FROM Venta v 
-    JOIN Empleado e ON v.ID_Empleado = e.ID_Empleado 
-    ORDER BY v.Venta_Fecha DESC 
-    LIMIT 5
-");
+// Estadísticas de ventas de hoy
+$ventas_hoy = Venta::hoy()->get();
+$stats_ventas_hoy = [
+    'total' => $ventas_hoy->count(),
+    'monto' => $ventas_hoy->sum('Total')
+];
+
+// Productos con stock bajo
+$productos_bajo_stock = Producto::stockBajo()
+    ->orderBy('Cantidad_Stock', 'asc')
+    ->limit(5)
+    ->get();
+
+// Últimas ventas con relación de empleado
+$ultimas_ventas = Venta::with('empleado')
+    ->orderBy('Venta_Fecha', 'desc')
+    ->limit(5)
+    ->get();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -224,11 +235,6 @@ $ultimas_ventas = $conn->query("
             color: #856404;
         }
 
-        .badge-success {
-            background: #d4edda;
-            color: #155724;
-        }
-
         .alert {
             padding: 15px;
             border-radius: 8px;
@@ -289,13 +295,13 @@ $ultimas_ventas = $conn->query("
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📦</div>
-                <div class="stat-number"><?php echo $stats_productos['total']; ?></div>
+                <div class="stat-number"><?php echo $stats_productos; ?></div>
                 <div class="stat-label">Productos en inventario</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-icon">⚠️</div>
-                <div class="stat-number"><?php echo $stats_stock_bajo['total']; ?></div>
+                <div class="stat-number"><?php echo $stats_stock_bajo; ?></div>
                 <div class="stat-label">Productos con stock bajo</div>
             </div>
 
@@ -315,9 +321,9 @@ $ultimas_ventas = $conn->query("
         <div class="content-grid">
             <div class="card">
                 <h2>⚠️ Productos con Stock Bajo</h2>
-                <?php if ($stats_stock_bajo['total'] > 0): ?>
+                <?php if ($stats_stock_bajo > 0): ?>
                     <div class="alert alert-warning">
-                        <strong>¡Atención!</strong> Hay <?php echo $stats_stock_bajo['total']; ?> productos con menos de 10 unidades.
+                        <strong>¡Atención!</strong> Hay <?php echo $stats_stock_bajo; ?> productos con menos de 10 unidades.
                     </div>
                 <?php endif; ?>
                 
@@ -330,20 +336,20 @@ $ultimas_ventas = $conn->query("
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($producto = $productos_bajo_stock->fetch_assoc()): ?>
+                        <?php foreach ($productos_bajo_stock as $producto): ?>
                         <tr>
-                            <td><?php echo $producto['Nombre']; ?></td>
-                            <td><strong><?php echo $producto['Cantidad_Stock']; ?></strong></td>
+                            <td><?php echo $producto->Nombre; ?></td>
+                            <td><strong><?php echo $producto->Cantidad_Stock; ?></strong></td>
                             <td>
-                                <?php if ($producto['Cantidad_Stock'] < 5): ?>
+                                <?php if ($producto->Cantidad_Stock < 5): ?>
                                     <span class="badge badge-danger">Crítico</span>
                                 <?php else: ?>
                                     <span class="badge badge-warning">Bajo</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
-                        <?php endwhile; ?>
-                        <?php if ($productos_bajo_stock->num_rows == 0): ?>
+                        <?php endforeach; ?>
+                        <?php if ($productos_bajo_stock->count() == 0): ?>
                         <tr>
                             <td colspan="3" style="text-align: center; color: #28a745;">
                                 ✓ Todos los productos tienen stock suficiente
@@ -366,15 +372,15 @@ $ultimas_ventas = $conn->query("
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($venta = $ultimas_ventas->fetch_assoc()): ?>
+                        <?php foreach ($ultimas_ventas as $venta): ?>
                         <tr>
-                            <td><strong>#<?php echo str_pad($venta['ID_Venta'], 4, '0', STR_PAD_LEFT); ?></strong></td>
-                            <td><?php echo formatear_fecha($venta['Venta_Fecha']); ?></td>
-                            <td><strong><?php echo formatear_dinero($venta['Total']); ?></strong></td>
-                            <td><?php echo $venta['Nombre'] . ' ' . $venta['Apellido']; ?></td>
+                            <td><strong>#<?php echo str_pad($venta->ID_Venta, 4, '0', STR_PAD_LEFT); ?></strong></td>
+                            <td><?php echo $venta->fecha_formateada; ?></td>
+                            <td><strong><?php echo $venta->total_formateado; ?></strong></td>
+                            <td><?php echo $venta->empleado->nombre_completo; ?></td>
                         </tr>
-                        <?php endwhile; ?>
-                        <?php if ($ultimas_ventas->num_rows == 0): ?>
+                        <?php endforeach; ?>
+                        <?php if ($ultimas_ventas->count() == 0): ?>
                         <tr>
                             <td colspan="4" style="text-align: center; color: #666;">
                                 No hay ventas registradas
@@ -388,4 +394,3 @@ $ultimas_ventas = $conn->query("
     </div>
 </body>
 </html>
-<?php $conn->close(); ?>
