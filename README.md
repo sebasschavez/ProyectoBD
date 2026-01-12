@@ -2,17 +2,12 @@
 
 Este proyecto es un sistema de gestión y control para una tienda de abarrotes, diseñado para facilitar el manejo de los productos y mejorar la organización del negocio.
 
-🛒 ¿Qué hace el proyecto?
+## 🛒 ¿Qué hace el proyecto?
 
-El sistema permite:
-
-📋 Visualizar los productos disponibles en la tienda
-
-💰 Registrar los productos vendidos
-
-⚠️ Identificar productos que necesitan reabastecimiento
-
-📊 Llevar un mejor control del inventario
+- 📋 Visualizar los productos disponibles en la tienda
+- 💰 Registrar los productos vendidos
+- ⚠️ Identificar productos que necesitan reabastecimiento
+- 📊 Llevar un mejor control del inventario
 
 🎯 Objetivo
 
@@ -33,3 +28,4 @@ Control sencillo y práctico
 Información clara sobre existencias y ventas
 
 Mejor administración del negocio
+
